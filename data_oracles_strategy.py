@@ -24,7 +24,7 @@
 
 # ## Importing Necessary Libraries for Analysis
 
-# In[1816]:
+# In[176]:
 
 
 import yfinance as yf  # For downloading financial data
@@ -44,7 +44,7 @@ import streamlit as st
 
 # ### Fetch daily OHLCV data 
 
-# In[1817]:
+# In[177]:
 
 
 # Data for the TSLA, XLY, and SPY tickers is retrieved from the Yahoo Finance library, covering the period from January 1, 2019, 
@@ -54,21 +54,21 @@ xly = yf.download('XLY', start='2019-01-01', end='2025-03-05')
 spy = yf.download('SPY', start='2019-01-01', end='2025-03-05')
 
 
-# In[1818]:
+# In[178]:
 
 
 # Displays a summary of the TSLA DataFrame, including column names, data types, non-null counts, and memory usage.
 tsla.info()
 
 
-# In[1819]:
+# In[179]:
 
 
 # Displays a summary of the XLY DataFrame, including column names, data types, non-null counts, and memory usage.
 xly.info()
 
 
-# In[1820]:
+# In[180]:
 
 
 # Displays a summary of the SPY DataFrame, including column names, data types, non-null counts, and memory usage.
@@ -77,7 +77,7 @@ spy.info()
 
 # ### Fetch sentiment scores from the API
 
-# In[1821]:
+# In[181]:
 
 
 # Defines the API endpoint URL for retrieving news sentiment data related to Tesla (TSLA) 
@@ -111,7 +111,7 @@ spy.info()
 
 # ### Compute VI+ and VI-
 
-# In[1822]:
+# In[182]:
 
 
 # Defines a function to calculate the Vortex Indicator (VI) for a given DataFrame and ticker symbol.
@@ -154,7 +154,7 @@ def calculate_vortex(df, value, n=14):
     return vi_plus, vi_minus
 
 
-# In[1823]:
+# In[183]:
 
 
 # Calculates the Vortex Indicator values for TSLA and stores the results as new columns in the DataFrame.
@@ -167,7 +167,7 @@ xly['VI+'], xly['VI-'] = calculate_vortex(xly, 'XLY')
 spy['VI+'], spy['VI-'] = calculate_vortex(spy, 'SPY')
 
 
-# In[1824]:
+# In[184]:
 
 
 # Displays the first 20 rows of the TSLA DataFrame to provide an initial overview of its structure and content with the new function applied.
@@ -176,7 +176,7 @@ tsla.head(20)
 
 # ### Calculate Volume-Weighted Sentiment 
 
-# In[1825]:
+# In[185]:
 
 
 # Load the sentiment JSON file from local storage
@@ -218,7 +218,7 @@ print(sentiment_df.head())
 print(sentiment_df.info())
 
 
-# In[1826]:
+# In[186]:
 
 
 # Initialize an empty list to store processed sentiment records
@@ -240,21 +240,21 @@ for news_item in sentiment_json.get("feed", []):
 sentiment_data = pd.DataFrame(sentiment_data)
 
 
-# In[1827]:
+# In[187]:
 
 
 # Sort the DataFrame by publication time in ascending order for chronological analysis
 sentiment_data['time_published'].sort_values(ascending=True)
 
 
-# In[1828]:
+# In[188]:
 
 
 # Convert the 'time_published' column to only retain the date portion (drop time-of-day)
 sentiment_data['time_published'] = sentiment_data['time_published'].dt.date
 
 
-# In[1829]:
+# In[189]:
 
 
 # Filter sentiment data to retain only those records that match dates present in the TSLA index
@@ -266,7 +266,7 @@ sentiment_scores_filtered = sentiment_data[
 sentiment_scores_filtered = sentiment_scores_filtered.groupby('time_published')['sentiment_score'].mean().reset_index()
 
 
-# In[1830]:
+# In[190]:
 
 
 # Fix the multi-level column issue by selecting the 'Volume' column and resetting its name
@@ -277,7 +277,7 @@ tsla_volume = tsla_volume.reset_index()
 tsla_volume['Date'] = pd.to_datetime(tsla_volume['Date'])
 
 
-# In[1831]:
+# In[191]:
 
 
 # Convert 'time_published' in the sentiment data to datetime to match volume data type
@@ -293,7 +293,7 @@ merged_data = pd.merge(
 )
 
 
-# In[1832]:
+# In[192]:
 
 
 # Compute the weighted sentiment by multiplying raw sentiment by trading volume
@@ -311,7 +311,7 @@ merged_data['5_day_avg_sentiment_norm'] = (
 )
 
 
-# In[1833]:
+# In[193]:
 
 
 merged_data
@@ -319,7 +319,7 @@ merged_data
 
 # ### Derive ATR (10) for Volatility Adjustments
 
-# In[1834]:
+# In[194]:
 
 
 # Flatten MultiIndex columns if present to simplify DataFrame operations
@@ -359,7 +359,7 @@ tsla["position_size"] = tsla.apply(position_size, axis=1)
 print(tsla[["Close_TSLA", "ATR_10", "atr_pct", "position_size"]].tail(10))
 
 
-# In[1835]:
+# In[195]:
 
 
 # Create a line chart to visualize the ATR% (Average True Range as a percentage of price) over time
@@ -382,7 +382,7 @@ fig.add_hline(
 fig.show()
 
 
-# In[1836]:
+# In[196]:
 
 
 from IPython.display import IFrame
@@ -392,7 +392,7 @@ IFrame(src='figures/atr%_5y.html', width='100%', height='600px')
 
 # The chart illustrates the historical volatility of TSLA, measured by the Average True Range (ATR) as a percentage of the closing price. Periods where the ATR% falls below the dotted green line at 3% indicate low volatility, which is typically associated with more stable market conditions. In contrast, noticeable spikes—such as those seen in 2020 and 2021—reflect periods of heightened volatility. More recently, ATR% values appear to remain closer to or slightly above the low-volatility threshold, suggesting relatively calmer market behavior compared to earlier years.
 
-# In[1837]:
+# In[197]:
 
 
 # Filter the TSLA DataFrame to include only records from the year 2025
@@ -420,7 +420,7 @@ fig.show()
 
 # The chart displays ATR% for TSLA during 2025, reflecting how the stock's volatility has evolved since the start of the year. While ATR% began above the 7% mark in early January, it gradually declined and remained mostly between 4% and 6% throughout February. Although volatility did not breach the low-volatility threshold of 3%, the dip toward that level suggests a period of relative calm. Toward early March, ATR% showed a clear upward trend, indicating a potential resurgence in market volatility.
 
-# In[1838]:
+# In[198]:
 
 
 # Create Buy Signal
@@ -461,7 +461,7 @@ print("Buy signals:", tsla['Buy_Signal'].sum())
 print("Sell signals:", tsla['Sell_Signal'].sum())
 
 
-# In[1839]:
+# In[199]:
 
 
 # Create an empty figure object
@@ -505,7 +505,7 @@ fig.show()
 
 # The chart illustrates the closing price of Tesla stock over time, with overlaid trading signals generated by the strategy. Green upward triangles represent buy signals, while red downward triangles mark sell signals. These signals are distributed throughout periods of both rising and falling prices, reflecting how the algorithm dynamically enters and exits positions based on market conditions. Clusters of signals during high-volatility periods—such as 2020, 2021, and early 2025—indicate frequent entries and exits, whereas more stable phases show fewer trades.
 
-# In[1840]:
+# In[200]:
 
 
 # Calculate ATR as a percentage of the closing price to normalize volatility
@@ -566,7 +566,7 @@ print("Aggressive entries:", (tsla['Entry_Type'] == 'aggressive').sum())
 print("Conservative entries:", (tsla['Entry_Type'] == 'conservative').sum())
 
 
-# In[1841]:
+# In[201]:
 
 
 # Create an empty figure to hold all plot layers
@@ -627,19 +627,19 @@ fig.show()
 
 # ## Tesla Analysis Results
 
-# In[1842]:
+# In[202]:
 
 
 tsla_signals = tsla.reset_index()[['Date', 'VI_Cross_Up', 'VI_Cross_Down', 'atr_pct', 'Close_TSLA']]
 
 
-# In[1843]:
+# In[203]:
 
 
 merged_data = pd.merge(merged_data, tsla, on='Date', how='left')
 
 
-# In[1844]:
+# In[204]:
 
 
 # Calculate ATR percentage
@@ -695,7 +695,7 @@ print("Aggressive entries:", (merged_data['Entry_Type'] == 'aggressive').sum())
 print("Conservative entries:", (merged_data['Entry_Type'] == 'conservative').sum())
 
 
-# In[1845]:
+# In[205]:
 
 
 # Ensure 'Date' is datetime and set as index if needed
@@ -744,7 +744,7 @@ fig.update_layout(
 fig.show()
 
 
-# In[1846]:
+# In[206]:
 
 
 # Initialize portfolio variables
@@ -791,7 +791,7 @@ print(f"Total Trades: {len(returns)}")
 print(f"Average Profit per Trade: ${np.mean(returns):.2f}")
 
 
-# In[1847]:
+# In[207]:
 
 
 # Make sure index is datetime and 'Close_TSLA' exists
@@ -813,7 +813,7 @@ portfolio = vbt.Portfolio.from_signals(
 )
 
 
-# In[1848]:
+# In[208]:
 
 
 # Summary stats
@@ -823,14 +823,14 @@ print(portfolio.stats())
 portfolio.plot().show()
 
 
-# In[1849]:
+# In[209]:
 
 
 print(tsla['Buy_Signal'].sum())  # Should be > 0
 print(tsla['Sell_Signal'].sum())  # Should also be > 0
 
 
-# In[1850]:
+# In[210]:
 
 
 tsla = tsla.dropna(subset=['Close_TSLA'])
@@ -838,7 +838,7 @@ entries = tsla['Buy_Signal'].astype(bool)
 exits = tsla['Sell_Signal'].astype(bool)
 
 
-# In[1851]:
+# In[211]:
 
 
 price = tsla['Close_TSLA']
@@ -858,7 +858,7 @@ portfolio.plot().show()
 
 # ## XLY Analysis Results
 
-# In[1852]:
+# In[212]:
 
 
 #url = 'https://www.alphavantage.co/query?function=NEWS_SENTIMENT&time_from=20250101T0130&time_to=20250301T0130&limit=1000&tickers=XLY&apikey=PNM5EHRALIOT1CKJ'
@@ -876,7 +876,7 @@ portfolio.plot().show()
 #print(sentiment_json)
 
 
-# In[1853]:
+# In[213]:
 
 
 sentiment_data = []
@@ -889,7 +889,7 @@ for news_item in sentiment_json.get("feed", []):
 sentiment_data = pd.DataFrame(sentiment_data)
 
 
-# In[1854]:
+# In[214]:
 
 
 sentiment_data['time_published'] = sentiment_data['time_published'].dt.date
@@ -897,7 +897,7 @@ sentiment_scores_filtered = sentiment_data[pd.to_datetime(sentiment_data['time_p
 sentiment_scores_filtered = sentiment_scores_filtered.groupby('time_published')['sentiment_score'].mean().reset_index()
 
 
-# In[1855]:
+# In[215]:
 
 
 # Fix the multi-level column issue by selecting the 'Volume' column and resetting its name
@@ -917,7 +917,7 @@ merged_data['Buy_Condition'] = merged_data['5_day_avg_sentiment'] > 0
 merged_data['5_day_avg_sentiment_norm'] = merged_data['5_day_avg_sentiment']/merged_data['Volume'].mean()
 
 
-# In[1856]:
+# In[216]:
 
 
 # Flatten MultiIndex columns 
@@ -958,7 +958,7 @@ xly["position_size"] = xly.apply(position_size, axis=1)
 print(xly[["Close_XLY", "ATR_10", "atr_pct", "position_size"]].tail(10))
 
 
-# In[1857]:
+# In[217]:
 
 
 import plotly.express as px
@@ -967,7 +967,7 @@ fig.add_hline(y=0.03, line_dash="dot", line_color="green", annotation_text="Low 
 fig.show()
 
 
-# In[1858]:
+# In[218]:
 
 
 import plotly.express as px
@@ -981,13 +981,13 @@ fig.add_hline(y=0.03, line_dash="dot", line_color="green", annotation_text="Low 
 fig.show()
 
 
-# In[1859]:
+# In[219]:
 
 
 merged_data = pd.merge(merged_data, xly, on='Date', how='left')
 
 
-# In[1860]:
+# In[220]:
 
 
 # Calculate ATR percentage
@@ -1043,7 +1043,7 @@ print("Aggressive entries:", (merged_data['Entry_Type'] == 'aggressive').sum())
 print("Conservative entries:", (merged_data['Entry_Type'] == 'conservative').sum())
 
 
-# In[1861]:
+# In[221]:
 
 
 fig = go.Figure()
@@ -1095,7 +1095,7 @@ fig.update_layout(
 fig.show()
 
 
-# In[1862]:
+# In[222]:
 
 
 # Ensure 'Date' is datetime and set as index if needed
@@ -1144,7 +1144,7 @@ fig.update_layout(
 fig.show()
 
 
-# In[1863]:
+# In[223]:
 
 
 fig = go.Figure()
@@ -1173,7 +1173,7 @@ fig.update_layout(title='XLY Buy & Sell Signals', template='plotly_white')
 fig.show()
 
 
-# In[1864]:
+# In[224]:
 
 
 capital = 100000
@@ -1218,7 +1218,7 @@ print(f"Average Profit per Trade: ${np.mean(returns):.2f}")
 
 # ### Without sentiment code
 
-# In[1865]:
+# In[225]:
 
 
 # Without sentiment score
@@ -1252,7 +1252,7 @@ for i in range(1, len(xly_copy)):
             xly_copy.at[xly_copy.index[i], 'Position'] = 1
 
 
-# In[1866]:
+# In[226]:
 
 
 capital = 100000
@@ -1295,7 +1295,7 @@ print(f"Total Trades: {len(returns)}")
 print(f"Average Profit per Trade: ${np.mean(returns):.2f}")
 
 
-# In[1867]:
+# In[227]:
 
 
 xly = xly_copy.dropna(subset=['Close_XLY'])
@@ -1315,7 +1315,7 @@ print(portfolio.stats())
 portfolio.plot().show()
 
 
-# In[1868]:
+# In[228]:
 
 
 # Make sure index is datetime and 'Close_TSLA' exists
@@ -1340,7 +1340,7 @@ portfolio = vbt.Portfolio.from_signals(
 portfolio.plot().show()
 
 
-# In[1869]:
+# In[229]:
 
 
 # Summary stats
@@ -1350,7 +1350,7 @@ print(portfolio.stats())
 portfolio.plot().show()
 
 
-# In[1870]:
+# In[230]:
 
 
 xly = merged_data.dropna(subset=['Close_XLY'])
@@ -1358,7 +1358,7 @@ entries = merged_data['Buy_Signal'].astype(bool)
 exits = merged_data['Sell_Signal'].astype(bool)
 
 
-# In[1871]:
+# In[231]:
 
 
 price = merged_data['Close_XLY']
@@ -1376,7 +1376,7 @@ portfolio.plot().show()
 
 # ## SPY Analysis Results
 
-# In[1872]:
+# In[232]:
 
 
 # Flatten MultiIndex columns 
@@ -1417,7 +1417,7 @@ spy["position_size"] = spy.apply(position_size, axis=1)
 print(spy[["Close_SPY", "ATR_10", "atr_pct", "position_size"]].tail(10))
 
 
-# In[1873]:
+# In[233]:
 
 
 fig = px.line(spy, x=spy.index, y="atr_pct", title="ATR% Over Time")
@@ -1425,7 +1425,7 @@ fig.add_hline(y=0.03, line_dash="dot", line_color="green", annotation_text="Low 
 fig.show()
 
 
-# In[1874]:
+# In[234]:
 
 
 # Filter only 2025 data
@@ -1437,7 +1437,7 @@ fig.add_hline(y=0.03, line_dash="dot", line_color="green", annotation_text="Low 
 fig.show()
 
 
-# In[1875]:
+# In[235]:
 
 
 # Without sentiment score
@@ -1470,7 +1470,7 @@ for i in range(1, len(spy_copy)):
             spy_copy.at[spy_copy.index[i], 'Position'] = 1
 
 
-# In[1876]:
+# In[236]:
 
 
 capital = 100000
@@ -1513,7 +1513,7 @@ print(f"Total Trades: {len(returns)}")
 print(f"Average Profit per Trade: ${np.mean(returns):.2f}")
 
 
-# In[1877]:
+# In[237]:
 
 
 import vectorbt as vbt
@@ -1538,7 +1538,7 @@ portfolio.plot().show()
 
 # ## Optimization
 
-# In[1878]:
+# In[238]:
 
 
 tsla = yf.download('TSLA', start='2019-01-01', end='2025-03-05')
@@ -1546,7 +1546,7 @@ xly = yf.download('XLY', start='2019-01-01', end='2025-03-05')
 spy = yf.download('SPY', start='2019-01-01', end='2025-03-05')
 
 
-# In[1879]:
+# In[239]:
 
 
 def calculate_vortex(df, value, n):
@@ -1574,7 +1574,7 @@ def calculate_vortex(df, value, n):
     return vi_plus, vi_minus
 
 
-# In[1880]:
+# In[240]:
 
 
 tsla.columns = [
@@ -1583,7 +1583,7 @@ tsla.columns = [
 ]
 
 
-# In[1881]:
+# In[241]:
 
 
 # Define a list of different smoothing periods to test for the Vortex Indicator
@@ -1638,13 +1638,13 @@ print(portfolio.stats())
 
 # ## Peer Comparison: Apple Analysis Results 
 
-# In[1882]:
+# In[242]:
 
 
 appl = yf.download('AAPL', start='2019-01-01', end='2025-03-05')
 
 
-# In[1883]:
+# In[243]:
 
 
 appl.columns = [
@@ -1653,7 +1653,7 @@ appl.columns = [
 ]
 
 
-# In[1884]:
+# In[244]:
 
 
 def calculate_vortex(df, value, n):
@@ -1681,13 +1681,13 @@ def calculate_vortex(df, value, n):
     return vi_plus, vi_minus
 
 
-# In[1885]:
+# In[245]:
 
 
 appl['VI+_'], appl['VI-_'] = calculate_vortex(appl, 'AAPL', 14)
 
 
-# In[1886]:
+# In[246]:
 
 
 import json
@@ -1722,7 +1722,7 @@ print(sentiment_df.head())
 print(sentiment_df.info())
 
 
-# In[1887]:
+# In[247]:
 
 
 sentiment_data = []
@@ -1736,7 +1736,7 @@ sentiment_data = pd.DataFrame(sentiment_data)
 sentiment_data['time_published'] = sentiment_data['time_published'].dt.date
 
 
-# In[1888]:
+# In[248]:
 
 
 sentiment_scores_filtered = sentiment_data[pd.to_datetime(sentiment_data['time_published']).isin(appl.index)]
@@ -1744,7 +1744,7 @@ sentiment_scores_filtered = sentiment_scores_filtered.groupby('time_published')[
 print(len(sentiment_scores_filtered))
 
 
-# In[1889]:
+# In[249]:
 
 
 appl_volume = appl[('Volume_AAPL')].reset_index()
@@ -1761,7 +1761,7 @@ merged_data['5_day_avg_sentiment_norm'] = merged_data['5_day_avg_sentiment']/mer
 merged_data.head()
 
 
-# In[1890]:
+# In[250]:
 
 
 # Calculate True Range
@@ -1791,7 +1791,7 @@ appl["position_size"] = appl.apply(position_size, axis=1)
 print(appl[["Close_AAPL", "ATR_10", "atr_pct", "position_size"]].tail(10))
 
 
-# In[1891]:
+# In[251]:
 
 
 import plotly.express as px
@@ -1800,7 +1800,7 @@ fig.add_hline(y=0.03, line_dash="dot", line_color="green", annotation_text="Low 
 fig.show()
 
 
-# In[1892]:
+# In[252]:
 
 
 # Filter only 2025 data
@@ -1810,13 +1810,13 @@ fig.add_hline(y=0.03, line_dash="dot", line_color="green", annotation_text="Low 
 fig.show()
 
 
-# In[1893]:
+# In[253]:
 
 
 merged_data = pd.merge(merged_data, appl, on='Date', how='left')
 
 
-# In[1894]:
+# In[254]:
 
 
 # Calculate ATR percentage
@@ -1872,61 +1872,7 @@ print("Aggressive entries:", (merged_data['Entry_Type'] == 'aggressive').sum())
 print("Conservative entries:", (merged_data['Entry_Type'] == 'conservative').sum())
 
 
-# In[1895]:
-
-
-import plotly.graph_objects as go
-
-fig = go.Figure()
-
-# Plot merged_data closing price
-fig.add_trace(go.Scatter(
-    x=merged_data.index, 
-    y=merged_data['Close_AAPL'], 
-    mode='lines', 
-    name='merged_data Price', 
-    line=dict(color='blue')
-))
-
-# Aggressive buys
-fig.add_trace(go.Scatter(
-    x=merged_data[(merged_data['Buy_Signal']) & (merged_data['Entry_Type'] == 'aggressive')].index,
-    y=merged_data[(merged_data['Buy_Signal']) & (merged_data['Entry_Type'] == 'aggressive')]['Close_AAPL'],
-    mode='markers',
-    name='Buy (Aggressive)',
-    marker=dict(symbol='triangle-up', color='limegreen', size=10)
-))
-
-# Conservative buys
-fig.add_trace(go.Scatter(
-    x=merged_data[(merged_data['Buy_Signal']) & (merged_data['Entry_Type'] == 'conservative')].index,
-    y=merged_data[(merged_data['Buy_Signal']) & (merged_data['Entry_Type'] == 'conservative')]['Close_AAPL'],
-    mode='markers',
-    name='Buy (Conservative)',
-    marker=dict(symbol='triangle-up', color='green', size=10)
-))
-
-# Sells
-fig.add_trace(go.Scatter(
-    x=merged_data[merged_data['Sell_Signal']].index,
-    y=merged_data[merged_data['Sell_Signal']]['Close_AAPL'],
-    mode='markers',
-    name='Sell Signal',
-    marker=dict(symbol='triangle-down', color='red', size=10)
-))
-
-fig.update_layout(
-    title='merged_data Buy/Sell Signals Over Time',
-    xaxis_title='Date',
-    yaxis_title='Price (USD)',
-    template='plotly_white',
-    height=600
-)
-
-fig.show()
-
-
-# In[1896]:
+# In[255]:
 
 
 import plotly.graph_objects as go
@@ -1977,38 +1923,7 @@ fig.update_layout(
 fig.show()
 
 
-# In[1897]:
-
-
-import plotly.graph_objects as go
-
-fig = go.Figure()
-
-fig.add_trace(go.Scatter(x=merged_data.index, y=merged_data['Close_AAPL'], mode='lines', name='merged_data Price'))
-
-# Buy markers
-fig.add_trace(go.Scatter(
-    x=merged_data[merged_data['Buy_Signal']].index,
-    y=merged_data[merged_data['Buy_Signal']]['Close_AAPL'],
-    mode='markers',
-    marker=dict(symbol='triangle-up', size=10, color='green'),
-    name='Buy Signal'
-))
-
-# Sell markers
-fig.add_trace(go.Scatter(
-    x=merged_data[merged_data['Sell_Signal']].index,
-    y=merged_data[merged_data['Sell_Signal']]['Close_AAPL'],
-    mode='markers',
-    marker=dict(symbol='triangle-down', size=10, color='red'),
-    name='Sell Signal'
-))
-
-fig.update_layout(title='XLY Buy & Sell Signals', template='plotly_white')
-fig.show()
-
-
-# In[1898]:
+# In[256]:
 
 
 capital = 100000
@@ -2051,35 +1966,7 @@ print(f"Total Trades: {len(returns)}")
 print(f"Average Profit per Trade: ${np.mean(returns):.2f}")
 
 
-# In[1899]:
-
-
-import vectorbt as vbt
-
-# Make sure index is datetime and 'Close_TSLA' exists
-price = merged_data['Close_AAPL']
-
-# Generate entries and exits from your signals
-entries = merged_data['Buy_Signal']
-exits = merged_data['Sell_Signal']
-
-# Create portfolio
-portfolio = vbt.Portfolio.from_signals(
-    close=price,
-    entries=entries,
-    exits=exits,
-    size=np.nan,  # Let it auto-calculate position size if fixed capital
-    init_cash=100_000,
-    fees=0.001,  # 0.1% per trade
-    slippage=0.0005  # Optional
-)
-
-# Plot portfolio value
-print(portfolio.stats())
-portfolio.plot().show()
-
-
-# In[1900]:
+# In[257]:
 
 
 appl_ = merged_data.dropna(subset=['Close_AAPL'])
@@ -2102,7 +1989,7 @@ portfolio.plot().show()
 
 # ### Without Sentiment
 
-# In[1901]:
+# In[258]:
 
 
 # WITHOUT sentiment
@@ -2136,7 +2023,7 @@ for i in range(1, len(appl_copy)):
             appl_copy.at[appl_copy.index[i], 'Position'] = 1
 
 
-# In[1902]:
+# In[259]:
 
 
 capital = 100000
@@ -2179,7 +2066,7 @@ print(f"Total Trades: {len(returns)}")
 print(f"Average Profit per Trade: ${np.mean(returns):.2f}")
 
 
-# In[1903]:
+# In[260]:
 
 
 import vectorbt as vbt
@@ -2205,7 +2092,7 @@ portfolio.plot().show()
 # 
 # The cumulative returns graph further supports this interpretation. The strategy closely follows the broader market trend, generating consistent gains and outperforming during certain periods. The trade PnL distribution shows a good number of winning trades with healthy profitability, and although there were losses, the downside was generally contained. Therefore, this peer comparison confirms that the strategy generalizes reasonably well beyond TSLA, making it a potentially viable approach for other high-liquidity technology stocks like AAPL.
 
-# In[1904]:
+# In[261]:
 
 
 # Calculate ATR percentage
@@ -2237,7 +2124,7 @@ print("Buy signals:", appl['Buy_Signal'].sum())
 print("Sell signals:", appl['Sell_Signal'].sum())
 
 
-# In[1905]:
+# In[262]:
 
 
 import plotly.graph_objects as go
@@ -2270,7 +2157,7 @@ fig.show()
 
 # ## VI Plots
 
-# In[1906]:
+# In[263]:
 
 
 tsla = yf.download('TSLA', start='2019-01-01', end='2025-03-05')
@@ -2278,7 +2165,7 @@ xly = yf.download('XLY', start='2019-01-01', end='2025-03-05')
 spy = yf.download('SPY', start='2019-01-01', end='2025-03-05')
 
 
-# In[1907]:
+# In[264]:
 
 
 def calculate_vortex(df, value, n=14):
@@ -2309,7 +2196,7 @@ def calculate_vortex(df, value, n=14):
     return vi_plus, vi_minus
 
 
-# In[1908]:
+# In[265]:
 
 
 tsla['VI+'], tsla['VI-'] = calculate_vortex(tsla, 'TSLA')
@@ -2317,7 +2204,7 @@ xly['VI+'], xly['VI-'] = calculate_vortex(xly, 'XLY')
 spy['VI+'], spy['VI-'] = calculate_vortex(spy, 'SPY')
 
 
-# In[1909]:
+# In[266]:
 
 
 # Flatten MultiIndex columns 
@@ -2358,7 +2245,7 @@ tsla["position_size"] = tsla.apply(position_size, axis=1)
 print(tsla[["Close_TSLA", "ATR_10", "atr_pct", "position_size"]].tail(10))
 
 
-# In[1910]:
+# In[267]:
 
 
 # Create the line chart for ATR%
@@ -2377,7 +2264,7 @@ st.subheader("ATR% Over Time for TSLA")
 st.plotly_chart(fig_atr_tsla, use_container_width=True)
 
 
-# In[1912]:
+# In[268]:
 
 
 # Create the figure for TSLA full period
@@ -2415,7 +2302,7 @@ st.subheader("Vortex Indicator for TSLA - Full Period")
 st.plotly_chart(fig_tsla_full, use_container_width=True)
 
 
-# In[1914]:
+# In[269]:
 
 
 # Filter TSLA data for 2025
@@ -2456,7 +2343,7 @@ st.subheader("Vortex Indicator for TSLA - 2025")
 st.plotly_chart(fig_tsla_2025, use_container_width=True)
 
 
-# In[1915]:
+# In[270]:
 
 
 # Create the figure with a unique name
@@ -2494,7 +2381,7 @@ st.subheader("Vortex Indicator for SPY - Full Period")
 st.plotly_chart(fig_spy_full, use_container_width=True)
 
 
-# In[1916]:
+# In[271]:
 
 
 # Filter SPY data for 2025
@@ -2535,7 +2422,7 @@ st.subheader("Vortex Indicator for SPY - 2025")
 st.plotly_chart(fig_spy_2025, use_container_width=True)
 
 
-# In[1917]:
+# In[272]:
 
 
 # Create the figure with a descriptive name
@@ -2573,7 +2460,7 @@ st.subheader("Vortex Indicator for XLY - Full Period")
 st.plotly_chart(fig_xly_full, use_container_width=True)
 
 
-# In[1918]:
+# In[273]:
 
 
 # Filter the XLY data for 2025
@@ -2614,7 +2501,7 @@ st.subheader("Vortex Indicator for XLY – 2025")
 st.plotly_chart(fig_xly_2025, use_container_width=True)
 
 
-# In[1919]:
+# In[274]:
 
 
 from plotly.subplots import make_subplots
@@ -2681,7 +2568,7 @@ fig_2025.update_layout(
 st.plotly_chart(fig_2025)
 
 
-# In[1920]:
+# In[275]:
 
 
 fig_full = make_subplots(
