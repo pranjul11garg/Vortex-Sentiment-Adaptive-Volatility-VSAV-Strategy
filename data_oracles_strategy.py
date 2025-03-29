@@ -2866,7 +2866,7 @@ fig_2025.update_layout(
 st.plotly_chart(fig_2025)
 
 
-# In[3329]:
+# In[3330]:
 
 
 fig_full = make_subplots(
@@ -2924,9 +2924,34 @@ fig_full.add_trace(go.Scatter(
 
 fig_full.update_layout(
     height=900, width=1200,
-    title_text="Vortex Indicator (VI+ and VI−) - Full Period Comparison",
-    template="plotly_white"
+    title_text="Vortex Indicator (VI+ and VI−) – Full Period Comparison",
+    template="plotly_white",
+    shapes=[
+        # COVID Crash
+        dict(type="rect", xref="x", yref="paper",
+             x0="2020-02-15", x1="2020-08-15", y0=0, y1=1,
+             fillcolor="LightBlue", opacity=0.3, layer="below", line_width=0),
+        
+        # Inflation Regime
+        dict(type="rect", xref="x", yref="paper",
+             x0="2021-11-01", x1="2023-07-01", y0=0, y1=1,
+             fillcolor="LightSalmon", opacity=0.3, layer="below", line_width=0),
+
+        # AI Boom
+        dict(type="rect", xref="x", yref="paper",
+             x0="2023-01-01", x1="2025-12-31", y0=0, y1=1,
+             fillcolor="LightGreen", opacity=0.2, layer="below", line_width=0)
+    ],
+    annotations=[
+        dict(x="2020-04-15", y=1.45, xref="x", yref="paper",
+             text="COVID Shock", showarrow=False, font=dict(size=10)),
+        dict(x="2022-06-01", y=1.45, xref="x", yref="paper",
+             text="Inflation Spike", showarrow=False, font=dict(size=10)),
+        dict(x="2024-01-01", y=1.45, xref="x", yref="paper",
+             text="AI Rally / Soft Landing", showarrow=False, font=dict(size=10))
+    ]
 )
+
 
 st.plotly_chart(fig_full)
 
