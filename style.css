@@ -1,0 +1,21 @@
+/* Make the navbar background red */
+.navbar, .navbar-expand-lg {
+    background-color: hsl(0, 100%, 40%) !important;  /* Red background */
+    border-bottom: 3px solid white !important; /* Optional: White bottom border */
+}
+
+/* Ensure text remains white */
+.navbar a, .navbar-brand, .navbar-nav .nav-link {
+    color: white !important; 
+}
+
+/* Keep hover text white */
+.navbar a:hover, .navbar-nav .nav-link:hover {
+    color: white !important;
+}
+
+iframe {
+    margin: 0;
+    padding: 0;
+    display: block;
+}

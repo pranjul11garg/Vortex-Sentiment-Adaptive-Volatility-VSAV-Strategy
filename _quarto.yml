@@ -1,0 +1,18 @@
+project:
+  type: website  
+
+website:
+  title: Vortex Sentiment Adaptive Volatility VSAV Strategy
+  navbar:
+    left:
+      - text: "Home"
+        href: data_oracles_strategy.ipynb 
+  repo-url: "https://github.com/pranjul11garg/Vortex-Sentiment-Adaptive-Volatility-VSAV-Strategy.git"
+
+format:
+  html:
+    theme: default 
+    css: styles.css 
+    embed-resources: true
+    code-fold: true
+    
