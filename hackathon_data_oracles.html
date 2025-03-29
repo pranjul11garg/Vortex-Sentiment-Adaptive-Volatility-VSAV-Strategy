@@ -1,0 +1,2007 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.40">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>volatility</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="hackathon_data_oracles_files/libs/clipboard/clipboard.min.js"></script>
+<script src="hackathon_data_oracles_files/libs/quarto-html/quarto.js"></script>
+<script src="hackathon_data_oracles_files/libs/quarto-html/popper.min.js"></script>
+<script src="hackathon_data_oracles_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="hackathon_data_oracles_files/libs/quarto-html/anchor.min.js"></script>
+<link href="hackathon_data_oracles_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="hackathon_data_oracles_files/libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="hackathon_data_oracles_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="hackathon_data_oracles_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="hackathon_data_oracles_files/libs/bootstrap/bootstrap-973236bd072d72a04ee9cd82dcc9cb29.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">volatility</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="cell-1" class="cell" data-execution_count="91">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> yfinance <span class="im">as</span> yf</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-2" class="cell" data-outputid="d2b18763-b874-471e-fd06-1cc141c449e3" data-execution_count="92">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>tsla <span class="op">=</span> yf.download(<span class="st">'TSLA'</span>, start<span class="op">=</span><span class="st">'2019-01-01'</span>, end<span class="op">=</span><span class="st">'2025-03-05'</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>xly <span class="op">=</span> yf.download(<span class="st">'XLY'</span>, start<span class="op">=</span><span class="st">'2019-01-01'</span>, end<span class="op">=</span><span class="st">'2025-03-05'</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>spy <span class="op">=</span> yf.download(<span class="st">'SPY'</span>, start<span class="op">=</span><span class="st">'2019-01-01'</span>, end<span class="op">=</span><span class="st">'2025-03-05'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed</code></pre>
+</div>
+</div>
+<div id="cell-3" class="cell" data-outputid="ffaa84e9-b819-44a7-f26e-e2a55a32d83e" data-execution_count="93">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>spy.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+DatetimeIndex: 1551 entries, 2019-01-02 to 2025-03-04
+Data columns (total 5 columns):
+ #   Column         Non-Null Count  Dtype  
+---  ------         --------------  -----  
+ 0   (Close, SPY)   1551 non-null   float64
+ 1   (High, SPY)    1551 non-null   float64
+ 2   (Low, SPY)     1551 non-null   float64
+ 3   (Open, SPY)    1551 non-null   float64
+ 4   (Volume, SPY)  1551 non-null   int64  
+dtypes: float64(4), int64(1)
+memory usage: 72.7 KB</code></pre>
+</div>
+</div>
+<div id="cell-4" class="cell" data-outputid="7ed07fe6-9918-4dbf-c178-7bca798f93a3" data-execution_count="94">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(tsla)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="94">
+<pre><code>1551</code></pre>
+</div>
+</div>
+<div id="cell-5" class="cell" data-outputid="6e7bc69d-4e6d-421f-99e7-c4ad1fb3ad76" data-execution_count="95">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>xly.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="95">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Price</th>
+<th data-quarto-table-cell-role="th">Close</th>
+<th data-quarto-table-cell-role="th">High</th>
+<th data-quarto-table-cell-role="th">Low</th>
+<th data-quarto-table-cell-role="th">Open</th>
+<th data-quarto-table-cell-role="th">Volume</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">Ticker</th>
+<th data-quarto-table-cell-role="th">XLY</th>
+<th data-quarto-table-cell-role="th">XLY</th>
+<th data-quarto-table-cell-role="th">XLY</th>
+<th data-quarto-table-cell-role="th">XLY</th>
+<th data-quarto-table-cell-role="th">XLY</th>
+</tr>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Date</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2019-01-02</td>
+<td>94.046104</td>
+<td>94.574027</td>
+<td>91.246214</td>
+<td>91.745857</td>
+<td>6840800</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2019-01-03</td>
+<td>92.009811</td>
+<td>93.555877</td>
+<td>91.849550</td>
+<td>93.329626</td>
+<td>6346000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2019-01-04</td>
+<td>95.054817</td>
+<td>95.752431</td>
+<td>93.065670</td>
+<td>93.254212</td>
+<td>7269100</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2019-01-07</td>
+<td>97.204208</td>
+<td>97.826402</td>
+<td>95.460172</td>
+<td>95.507303</td>
+<td>6263100</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2019-01-08</td>
+<td>98.278938</td>
+<td>98.806861</td>
+<td>96.883704</td>
+<td>98.212948</td>
+<td>9391000</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="cell-6" class="cell" data-execution_count="96">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> calculate_vortex(df, value, n<span class="op">=</span><span class="dv">14</span>):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    high <span class="op">=</span> df[(<span class="st">"High"</span>, value)]</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    low <span class="op">=</span> df[(<span class="st">"Low"</span>, value)]</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    close <span class="op">=</span> df[(<span class="st">"Close"</span>, value)]</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate VM+ and VM-</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    vm_plus <span class="op">=</span> <span class="bu">abs</span>(high <span class="op">-</span> low.shift(<span class="dv">1</span>))   <span class="co"># |Today's High - Yesterday's Low|</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    vm_minus <span class="op">=</span> <span class="bu">abs</span>(low <span class="op">-</span> high.shift(<span class="dv">1</span>))  <span class="co"># |Today's Low - Yesterday's High|</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate True Range (TR)</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    tr <span class="op">=</span> pd.concat([</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        high <span class="op">-</span> low,</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">abs</span>(high <span class="op">-</span> close.shift(<span class="dv">1</span>)),</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="bu">abs</span>(low <span class="op">-</span> close.shift(<span class="dv">1</span>))</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    ], axis<span class="op">=</span><span class="dv">1</span>).<span class="bu">max</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Rolling sum for lookback period</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    sum_vm_plus <span class="op">=</span> vm_plus.rolling(window<span class="op">=</span>n).<span class="bu">sum</span>()</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    sum_vm_minus <span class="op">=</span> vm_minus.rolling(window<span class="op">=</span>n).<span class="bu">sum</span>()</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    sum_tr <span class="op">=</span> tr.rolling(window<span class="op">=</span>n).<span class="bu">sum</span>()</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compute VI+ and VI-</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    vi_plus <span class="op">=</span> sum_vm_plus <span class="op">/</span> sum_tr</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    vi_minus <span class="op">=</span> sum_vm_minus <span class="op">/</span> sum_tr</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> vi_plus, vi_minus</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-7" class="cell" data-outputid="d20f0c8a-1822-4449-8396-a9d5113f3deb" data-execution_count="97">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>tsla[<span class="st">'VI+'</span>], tsla[<span class="st">'VI-'</span>] <span class="op">=</span> calculate_vortex(tsla, <span class="st">'TSLA'</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>xly[<span class="st">'VI+'</span>], xly[<span class="st">'VI-'</span>] <span class="op">=</span> calculate_vortex(xly, <span class="st">'XLY'</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>spy[<span class="st">'VI+'</span>], spy[<span class="st">'VI-'</span>] <span class="op">=</span> calculate_vortex(spy, <span class="st">'SPY'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-8" class="cell" data-execution_count="98">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>spy.head(<span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="98">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Price</th>
+<th data-quarto-table-cell-role="th">Close</th>
+<th data-quarto-table-cell-role="th">High</th>
+<th data-quarto-table-cell-role="th">Low</th>
+<th data-quarto-table-cell-role="th">Open</th>
+<th data-quarto-table-cell-role="th">Volume</th>
+<th data-quarto-table-cell-role="th">VI+</th>
+<th data-quarto-table-cell-role="th">VI-</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">Ticker</th>
+<th data-quarto-table-cell-role="th">SPY</th>
+<th data-quarto-table-cell-role="th">SPY</th>
+<th data-quarto-table-cell-role="th">SPY</th>
+<th data-quarto-table-cell-role="th">SPY</th>
+<th data-quarto-table-cell-role="th">SPY</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Date</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2019-01-02</td>
+<td>226.954727</td>
+<td>227.889121</td>
+<td>223.117420</td>
+<td>223.144634</td>
+<td>126925200</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2019-01-03</td>
+<td>221.539001</td>
+<td>225.494246</td>
+<td>221.049124</td>
+<td>225.185799</td>
+<td>144140700</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2019-01-04</td>
+<td>228.959625</td>
+<td>229.612786</td>
+<td>224.224218</td>
+<td>224.605226</td>
+<td>142628800</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2019-01-07</td>
+<td>230.764832</td>
+<td>232.189075</td>
+<td>228.324553</td>
+<td>229.231719</td>
+<td>103139100</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2019-01-08</td>
+<td>232.932983</td>
+<td>233.422861</td>
+<td>230.420144</td>
+<td>232.978358</td>
+<td>102512600</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2019-01-09</td>
+<td>234.021576</td>
+<td>234.874314</td>
+<td>232.406822</td>
+<td>233.649635</td>
+<td>95006600</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2019-01-10</td>
+<td>234.847107</td>
+<td>235.101112</td>
+<td>231.780882</td>
+<td>232.470337</td>
+<td>96823900</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2019-01-11</td>
+<td>234.937836</td>
+<td>234.965050</td>
+<td>233.168851</td>
+<td>233.758503</td>
+<td>73858100</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2019-01-14</td>
+<td>233.504471</td>
+<td>234.320915</td>
+<td>232.606386</td>
+<td>233.014594</td>
+<td>70908200</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2019-01-15</td>
+<td>236.180664</td>
+<td>236.498178</td>
+<td>233.876455</td>
+<td>233.885535</td>
+<td>85208300</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2019-01-16</td>
+<td>236.752213</td>
+<td>237.650298</td>
+<td>236.407485</td>
+<td>236.616115</td>
+<td>77636700</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2019-01-17</td>
+<td>238.548340</td>
+<td>239.419239</td>
+<td>235.826842</td>
+<td>235.872217</td>
+<td>96118400</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2019-01-18</td>
+<td>241.723404</td>
+<td>242.195148</td>
+<td>238.584618</td>
+<td>240.380816</td>
+<td>127900300</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2019-01-22</td>
+<td>238.457611</td>
+<td>240.453387</td>
+<td>236.824724</td>
+<td>240.235676</td>
+<td>115531200</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2019-01-23</td>
+<td>238.956558</td>
+<td>240.208452</td>
+<td>236.461852</td>
+<td>239.500863</td>
+<td>86030300</td>
+<td>1.130635</td>
+<td>0.628505</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2019-01-24</td>
+<td>239.083557</td>
+<td>239.673237</td>
+<td>237.750022</td>
+<td>238.775124</td>
+<td>59204100</td>
+<td>1.243885</td>
+<td>0.588642</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2019-01-25</td>
+<td>241.106567</td>
+<td>241.941172</td>
+<td>239.183380</td>
+<td>240.952337</td>
+<td>96883400</td>
+<td>1.294368</td>
+<td>0.643289</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2019-01-28</td>
+<td>239.274063</td>
+<td>239.337544</td>
+<td>237.486945</td>
+<td>238.938416</td>
+<td>85613700</td>
+<td>1.114517</td>
+<td>0.723054</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2019-01-29</td>
+<td>238.956558</td>
+<td>239.990713</td>
+<td>238.112901</td>
+<td>239.419222</td>
+<td>66136300</td>
+<td>1.081445</td>
+<td>0.729691</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2019-01-30</td>
+<td>242.739441</td>
+<td>243.592179</td>
+<td>239.718591</td>
+<td>240.489687</td>
+<td>92473700</td>
+<td>1.050548</td>
+<td>0.675231</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="cell-9" class="cell" data-execution_count="99">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">'https://www.alphavantage.co/query?function=NEWS_SENTIMENT&amp;tickers=AAPL&amp;apikey=PNM5EHRALIOT1CKJ'</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> requests.get(url)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> response.status_code <span class="op">==</span> <span class="dv">200</span>:</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    sentiment_data <span class="op">=</span> response.json()</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    sentiment_df <span class="op">=</span> pd.DataFrame(sentiment_data[<span class="st">'feed'</span>]) </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(sentiment_df.head())</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"API call failed:"</span>, response.status_code)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                               title  \
+0  EXCLUSIVE: Which Magnificent 7 Stock Will Perf...   
+1  New Inflation Data Dismays Bulls, CoreWeave IP...   
+2  Assessing Apple's Performance Against Competit...   
+3  Apple's Options Frenzy: What You Need to Know ...   
+4  Trading The SPY As PCE Inflation Report Takes ...   
+
+                                                 url   time_published  \
+0  https://www.benzinga.com/tech/25/03/44544129/e...  20250328T190544   
+1  https://www.benzinga.com/markets/equities/25/0...  20250328T161558   
+2  https://www.benzinga.com/insights/news/25/03/4...  20250328T150055   
+3  https://www.benzinga.com/insights/options/25/0...  20250328T134533   
+4  https://www.benzinga.com/markets/equities/25/0...  20250328T125805   
+
+               authors                                            summary  \
+0        [Chris Katje]  Benzinga readers pick their favorite Magnifice...   
+1   [The Arora Report]  To gain an edge, this is what you need to know...   
+2  [Benzinga Insights]  Amidst the fast-paced and highly competitive b...   
+3  [Benzinga Insights]  Investors with a lot of money to spend have ta...   
+4               [RIPS]  Good Morning Traders! In today's Market Clubho...   
+
+                                        banner_image    source  \
+0  https://cdn.benzinga.com/files/images/story/20...  Benzinga   
+1  https://thearorareport.com/wp-content/uploads/...  Benzinga   
+2  https://www.benzinga.com/files/images/story/20...  Benzinga   
+3  https://www.benzinga.com/files/images/story/20...  Benzinga   
+4  https://www.benzinga.com/next-assets/images/sc...  Benzinga   
+
+  category_within_source     source_domain  \
+0                Trading  www.benzinga.com   
+1                Markets  www.benzinga.com   
+2                Trading  www.benzinga.com   
+3                Markets  www.benzinga.com   
+4                Trading  www.benzinga.com   
+
+                                              topics  overall_sentiment_score  \
+0  [{'topic': 'Retail &amp; Wholesale', 'relevance_sc...                 0.266216   
+1  [{'topic': 'Technology', 'relevance_score': '0...                 0.240809   
+2  [{'topic': 'Earnings', 'relevance_score': '0.8...                 0.265078   
+3  [{'topic': 'Financial Markets', 'relevance_sco...                 0.185008   
+4  [{'topic': 'Economy - Monetary', 'relevance_sc...                 0.084859   
+
+  overall_sentiment_label                                   ticker_sentiment  
+0        Somewhat-Bullish  [{'ticker': 'MSFT', 'relevance_score': '0.1984...  
+1        Somewhat-Bullish  [{'ticker': 'MSFT', 'relevance_score': '0.1725...  
+2        Somewhat-Bullish  [{'ticker': 'AAPL', 'relevance_score': '0.4680...  
+3        Somewhat-Bullish  [{'ticker': 'EVR', 'relevance_score': '0.06568...  
+4                 Neutral  [{'ticker': 'MSFT', 'relevance_score': '0.0813...  </code></pre>
+</div>
+</div>
+<div id="cell-10" class="cell" data-execution_count="100">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>sentiment_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="100">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">url</th>
+<th data-quarto-table-cell-role="th">time_published</th>
+<th data-quarto-table-cell-role="th">authors</th>
+<th data-quarto-table-cell-role="th">summary</th>
+<th data-quarto-table-cell-role="th">banner_image</th>
+<th data-quarto-table-cell-role="th">source</th>
+<th data-quarto-table-cell-role="th">category_within_source</th>
+<th data-quarto-table-cell-role="th">source_domain</th>
+<th data-quarto-table-cell-role="th">topics</th>
+<th data-quarto-table-cell-role="th">overall_sentiment_score</th>
+<th data-quarto-table-cell-role="th">overall_sentiment_label</th>
+<th data-quarto-table-cell-role="th">ticker_sentiment</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>EXCLUSIVE: Which Magnificent 7 Stock Will Perf...</td>
+<td>https://www.benzinga.com/tech/25/03/44544129/e...</td>
+<td>20250328T190544</td>
+<td>[Chris Katje]</td>
+<td>Benzinga readers pick their favorite Magnifice...</td>
+<td>https://cdn.benzinga.com/files/images/story/20...</td>
+<td>Benzinga</td>
+<td>Trading</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Retail &amp; Wholesale', 'relevance_sc...</td>
+<td>0.266216</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.1984...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>New Inflation Data Dismays Bulls, CoreWeave IP...</td>
+<td>https://www.benzinga.com/markets/equities/25/0...</td>
+<td>20250328T161558</td>
+<td>[The Arora Report]</td>
+<td>To gain an edge, this is what you need to know...</td>
+<td>https://thearorareport.com/wp-content/uploads/...</td>
+<td>Benzinga</td>
+<td>Markets</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Technology', 'relevance_score': '0...</td>
+<td>0.240809</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.1725...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Assessing Apple's Performance Against Competit...</td>
+<td>https://www.benzinga.com/insights/news/25/03/4...</td>
+<td>20250328T150055</td>
+<td>[Benzinga Insights]</td>
+<td>Amidst the fast-paced and highly competitive b...</td>
+<td>https://www.benzinga.com/files/images/story/20...</td>
+<td>Benzinga</td>
+<td>Trading</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Earnings', 'relevance_score': '0.8...</td>
+<td>0.265078</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'AAPL', 'relevance_score': '0.4680...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Apple's Options Frenzy: What You Need to Know ...</td>
+<td>https://www.benzinga.com/insights/options/25/0...</td>
+<td>20250328T134533</td>
+<td>[Benzinga Insights]</td>
+<td>Investors with a lot of money to spend have ta...</td>
+<td>https://www.benzinga.com/files/images/story/20...</td>
+<td>Benzinga</td>
+<td>Markets</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Financial Markets', 'relevance_sco...</td>
+<td>0.185008</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'EVR', 'relevance_score': '0.06568...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>Trading The SPY As PCE Inflation Report Takes ...</td>
+<td>https://www.benzinga.com/markets/equities/25/0...</td>
+<td>20250328T125805</td>
+<td>[RIPS]</td>
+<td>Good Morning Traders! In today's Market Clubho...</td>
+<td>https://www.benzinga.com/next-assets/images/sc...</td>
+<td>Benzinga</td>
+<td>Trading</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Economy - Monetary', 'relevance_sc...</td>
+<td>0.084859</td>
+<td>Neutral</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.0813...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>EU To Issue Minimal Fines To Apple And Meta To...</td>
+<td>https://www.benzinga.com/markets/25/03/4453457...</td>
+<td>20250328T122729</td>
+<td>[Namrata Sen]</td>
+<td>The European Union ( EU ) is reportedly set to...</td>
+<td>https://cdn.benzinga.com/files/images/story/20...</td>
+<td>Benzinga</td>
+<td>Markets</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Technology', 'relevance_score': '1...</td>
+<td>-0.103777</td>
+<td>Neutral</td>
+<td>[{'ticker': 'META', 'relevance_score': '0.2658...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>3 Northern Mutual Funds for Solid Returns</td>
+<td>https://www.zacks.com/stock/news/2436613/3-nor...</td>
+<td>20250328T111100</td>
+<td>[Zacks Equity Research]</td>
+<td>Invest in Northern mutual funds like NOIEX, NM...</td>
+<td>https://staticx-tuner.zacks.com/images/article...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Financial Markets', 'relevance_sco...</td>
+<td>0.272886</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.1496...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">7</td>
+<td>2 Breakout Growth Stocks You Can Buy and Hold ...</td>
+<td>https://www.fool.com/investing/2025/03/28/2-br...</td>
+<td>20250328T110700</td>
+<td>[Anders Bylund]</td>
+<td>Looking for undervalued stocks with explosive ...</td>
+<td>https://g.foolcdn.com/editorial/images/812691/...</td>
+<td>Motley Fool</td>
+<td>n/a</td>
+<td>www.fool.com</td>
+<td>[{'topic': 'Economy - Monetary', 'relevance_sc...</td>
+<td>0.298788</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'NFLX', 'relevance_score': '0.1478...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">8</td>
+<td>Intel's SuperFluid Cooling Tech 'Possibly Suit...</td>
+<td>https://www.benzinga.com/25/03/44532855/intels...</td>
+<td>20250328T104410</td>
+<td>[Rishabh Mishra]</td>
+<td>Intel Corp. INTC SuperFluid cooling tech could...</td>
+<td>https://editorial-assets.benzinga.com/wp-conte...</td>
+<td>Benzinga</td>
+<td>Markets</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Financial Markets', 'relevance_sco...</td>
+<td>0.226797</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'NVDA', 'relevance_score': '0.4078...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">9</td>
+<td>Should Strive 500 ETF ( STRV ) Be on Your In...</td>
+<td>https://www.zacks.com/stock/news/2436589/shoul...</td>
+<td>20250328T102007</td>
+<td>[Zacks Equity Research]</td>
+<td>Style Box ETF report for ...</td>
+<td>https://staticx-tuner.zacks.com/images/default...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Technology', 'relevance_score': '0...</td>
+<td>0.183048</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.1331...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">10</td>
+<td>Should Invesco Dividend Achievers ETF ( PFM )...</td>
+<td>https://www.zacks.com/stock/news/2436592/shoul...</td>
+<td>20250328T102005</td>
+<td>[Zacks Equity Research]</td>
+<td>Style Box ETF report for ...</td>
+<td>https://staticx-tuner.zacks.com/images/default...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Financial Markets', 'relevance_sco...</td>
+<td>0.201283</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.1235...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">11</td>
+<td>3 Subtle Ways Warren Buffett Is Investing in t...</td>
+<td>https://www.fool.com/investing/2025/03/28/3-wa...</td>
+<td>20250328T090600</td>
+<td>[Sean Williams]</td>
+<td>The Oracle of Omaha may not be tech-savvy, but...</td>
+<td>https://g.foolcdn.com/image/?url=https%3A%2F%2...</td>
+<td>Motley Fool</td>
+<td>n/a</td>
+<td>www.fool.com</td>
+<td>[{'topic': 'Retail &amp; Wholesale', 'relevance_sc...</td>
+<td>0.351273</td>
+<td>Bullish</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.0342...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">12</td>
+<td>Competitor Analysis: Evaluating Apple And Comp...</td>
+<td>https://www.benzinga.com/insights/news/25/03/4...</td>
+<td>20250327T150057</td>
+<td>[Benzinga Insights]</td>
+<td>In today's rapidly changing and fiercely compe...</td>
+<td>https://www.benzinga.com/files/images/story/20...</td>
+<td>Benzinga</td>
+<td>Trading</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Earnings', 'relevance_score': '0.8...</td>
+<td>0.265092</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'AAPL', 'relevance_score': '0.4811...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">13</td>
+<td>Prediction: Apple Will Soar Over the Next 5 Ye...</td>
+<td>https://www.fool.com/investing/2025/03/27/pred...</td>
+<td>20250327T144237</td>
+<td>[James Brumley]</td>
+<td>Investors aren't looking far enough down the r...</td>
+<td>https://g.foolcdn.com/editorial/images/812659/...</td>
+<td>Motley Fool</td>
+<td>n/a</td>
+<td>www.fool.com</td>
+<td>[{'topic': 'Technology', 'relevance_score': '1...</td>
+<td>0.070346</td>
+<td>Neutral</td>
+<td>[{'ticker': 'AAPL', 'relevance_score': '0.7575...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">14</td>
+<td>How To Trade SPY With Initial Jobless Claims I...</td>
+<td>https://www.benzinga.com/markets/equities/25/0...</td>
+<td>20250327T135059</td>
+<td>[RIPS]</td>
+<td>Good Morning Traders! In today's Market Clubho...</td>
+<td>https://www.benzinga.com/next-assets/images/sc...</td>
+<td>Benzinga</td>
+<td>Trading</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Technology', 'relevance_score': '0...</td>
+<td>0.145910</td>
+<td>Neutral</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.0537...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">15</td>
+<td>Can the Tide Turn for 'Magnificent Seven' Stoc...</td>
+<td>https://www.zacks.com/stock/news/2436001/can-t...</td>
+<td>20250327T120000</td>
+<td>[Zacks Investment Research]</td>
+<td>Mag-7 stocks can gain winning momentum but rem...</td>
+<td>https://staticx-tuner.zacks.com/images/article...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Retail &amp; Wholesale', 'relevance_sc...</td>
+<td>0.250291</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'BABA', 'relevance_score': '0.1028...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">16</td>
+<td>Is Nvidia the Next $5 Trillion Stock? Or Will ...</td>
+<td>https://www.fool.com/investing/2025/03/27/is-n...</td>
+<td>20250327T103000</td>
+<td>[CFA, Parkev Tatevosian]</td>
+<td>In the race to the coveted $5 trillion market ...</td>
+<td>https://g.foolcdn.com/editorial/images/812609/...</td>
+<td>Motley Fool</td>
+<td>n/a</td>
+<td>www.fool.com</td>
+<td>[{'topic': 'Technology', 'relevance_score': '0...</td>
+<td>0.108227</td>
+<td>Neutral</td>
+<td>[{'ticker': 'NVDA', 'relevance_score': '0.9836...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">17</td>
+<td>Apple's Microsoft Moment</td>
+<td>https://www.fool.com/investing/2025/03/27/appl...</td>
+<td>20250327T101500</td>
+<td>[Travis Hoium]</td>
+<td>Microsoft stock went nowhere for over a decade...</td>
+<td>https://g.foolcdn.com/editorial/images/812588/...</td>
+<td>Motley Fool</td>
+<td>n/a</td>
+<td>www.fool.com</td>
+<td>[{'topic': 'Technology', 'relevance_score': '1...</td>
+<td>0.092140</td>
+<td>Neutral</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.9495...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">18</td>
+<td>Is Apple About to Make a Massive Bet on Nvidia...</td>
+<td>https://www.fool.com/investing/2025/03/27/is-a...</td>
+<td>20250327T094500</td>
+<td>[Jose Najarro]</td>
+<td>Is Apple entering the artificial intelligence ...</td>
+<td>https://g.foolcdn.com/editorial/images/812645/...</td>
+<td>Motley Fool</td>
+<td>n/a</td>
+<td>www.fool.com</td>
+<td>[{'topic': 'Technology', 'relevance_score': '0...</td>
+<td>0.117406</td>
+<td>Neutral</td>
+<td>[{'ticker': 'NVDA', 'relevance_score': '0.9309...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">19</td>
+<td>After Siri Leadership Change, Apple Makes Anot...</td>
+<td>https://www.benzinga.com/media/25/03/44509405/...</td>
+<td>20250327T094326</td>
+<td>[Ananya Gairola]</td>
+<td>Apple Inc. AAPL is reportedly making a change ...</td>
+<td>https://editorial-assets.benzinga.com/wp-conte...</td>
+<td>Benzinga</td>
+<td>News</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Earnings', 'relevance_score': '0.4...</td>
+<td>0.218482</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'AAPL', 'relevance_score': '0.7929...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">20</td>
+<td>Zacks Investment Ideas feature highlights: Ver...</td>
+<td>https://www.zacks.com/stock/news/2435946/zacks...</td>
+<td>20250327T090000</td>
+<td>[Zacks Investment Research]</td>
+<td>Verizon, Apple and NVIDIA have been highlighte...</td>
+<td>https://staticx-tuner.zacks.com/images/article...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Financial Markets', 'relevance_sco...</td>
+<td>0.391871</td>
+<td>Bullish</td>
+<td>[{'ticker': 'VZ', 'relevance_score': '0.211191...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">21</td>
+<td>Zacks Earnings Trends Highlights: Meta, Tesla,...</td>
+<td>https://www.zacks.com/stock/news/2435945/zacks...</td>
+<td>20250327T090000</td>
+<td>[Zacks Investment Research]</td>
+<td>Meta, Tesla, Nvidia, Google, Microsoft, Amazon...</td>
+<td>https://staticx-tuner.zacks.com/images/article...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Retail &amp; Wholesale', 'relevance_sc...</td>
+<td>0.247812</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.0845...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">22</td>
+<td>Nvidia And Apple Supplier Foxconn To Present E...</td>
+<td>https://www.benzinga.com/markets/asia/25/03/44...</td>
+<td>20250327T074237</td>
+<td>[Kaustubh Bagalkote]</td>
+<td>Foxconn Technology Group, also known as Hon Ha...</td>
+<td>https://cdn.benzinga.com/files/images/story/20...</td>
+<td>Benzinga</td>
+<td>Markets</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Technology', 'relevance_score': '0...</td>
+<td>0.225838</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'MSBHF', 'relevance_score': '0.119...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">23</td>
+<td>Steve Jobs Warned 34 Years Ago About America B...</td>
+<td>https://www.benzinga.com/tech/25/03/44506409/s...</td>
+<td>20250327T005639</td>
+<td>[Ananya Gairola]</td>
+<td>More than three decades ago, Apple Inc. AAPL c...</td>
+<td>https://cdn.benzinga.com/files/images/story/20...</td>
+<td>Benzinga</td>
+<td>News</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Technology', 'relevance_score': '0...</td>
+<td>-0.031736</td>
+<td>Neutral</td>
+<td>[{'ticker': 'AAPL', 'relevance_score': '0.2923...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">24</td>
+<td>Breaking Down the Mag 7 Earnings Outlook</td>
+<td>https://www.zacks.com/commentary/2435922/break...</td>
+<td>20250326T225600</td>
+<td>[Sheraz Mian]</td>
+<td>The Magnificent 7 stocks have lost ground late...</td>
+<td>https://staticx-tuner.zacks.com/images/article...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Retail &amp; Wholesale', 'relevance_sc...</td>
+<td>0.231884</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.0812...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">25</td>
+<td>Breaking Down the Mag 7 Earnings Outlook</td>
+<td>https://www.zacks.com/commentary/2435925/break...</td>
+<td>20250326T225100</td>
+<td>[Sheraz Mian]</td>
+<td>The Magnificent 7 stocks have lost ground late...</td>
+<td>https://staticx-tuner.zacks.com/images/article...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Retail &amp; Wholesale', 'relevance_sc...</td>
+<td>0.231884</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.0812...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">26</td>
+<td>2 Wonderful High-Tech ETFs That Still Look Lik...</td>
+<td>https://www.fool.com/investing/2025/03/26/2-wo...</td>
+<td>20250326T222300</td>
+<td>[Matt Frankel]</td>
+<td>After a bit of a rebound, the Nasdaq Composite...</td>
+<td>https://g.foolcdn.com/editorial/images/812349/...</td>
+<td>Motley Fool</td>
+<td>n/a</td>
+<td>www.fool.com</td>
+<td>[{'topic': 'Financial Markets', 'relevance_sco...</td>
+<td>0.194173</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.0707...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">27</td>
+<td>Apple ( AAPL ) Stock Moves -0.99%: What You ...</td>
+<td>https://www.zacks.com/stock/news/2435844/apple...</td>
+<td>20250326T214516</td>
+<td>[Zacks Equity Research]</td>
+<td>Apple (AAPL) closed the most recent trading da...</td>
+<td>https://staticx-tuner.zacks.com/images/default...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Earnings', 'relevance_score': '0.9...</td>
+<td>0.087162</td>
+<td>Neutral</td>
+<td>[{'ticker': 'AAPL', 'relevance_score': '0.5387...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">28</td>
+<td>Meta Is Paying 'Way Above Market Rate' For Rea...</td>
+<td>https://www.benzinga.com/general/gaming/25/03/...</td>
+<td>20250326T153000</td>
+<td>[Adam Eckert]</td>
+<td>Meta is luring in VR programmers with "unusual...</td>
+<td>https://cdn.benzinga.com/files/images/story/20...</td>
+<td>Benzinga</td>
+<td>General</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Technology', 'relevance_score': '1...</td>
+<td>0.108467</td>
+<td>Neutral</td>
+<td>[{'ticker': 'GOOG', 'relevance_score': '0.1316...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">29</td>
+<td>These 3 Companies are Cash Generating Machines</td>
+<td>https://www.zacks.com/commentary/2435179/these...</td>
+<td>20250326T151500</td>
+<td>[Derek Lewis]</td>
+<td>Strong cash flows reflect financial stability,...</td>
+<td>https://staticx-tuner.zacks.com/images/article...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Financial Markets', 'relevance_sco...</td>
+<td>0.345548</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'VZ', 'relevance_score': '0.251032...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">30</td>
+<td>Insights Into Apple's Performance Versus Peers...</td>
+<td>https://www.benzinga.com/insights/news/25/03/4...</td>
+<td>20250326T150051</td>
+<td>[Benzinga Insights]</td>
+<td>Amidst the fast-paced and highly competitive b...</td>
+<td>https://www.benzinga.com/files/images/story/20...</td>
+<td>Benzinga</td>
+<td>Markets</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Earnings', 'relevance_score': '0.8...</td>
+<td>0.276249</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'AAPL', 'relevance_score': '0.4669...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">31</td>
+<td>The Zacks Analyst Blog Highlights Apple, Alpha...</td>
+<td>https://www.zacks.com/stock/news/2435683/the-z...</td>
+<td>20250326T144800</td>
+<td>[Zacks Equity Research]</td>
+<td>Apple, Alphabet, Garmin and Meta are part of t...</td>
+<td>https://staticx-tuner.zacks.com/images/article...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Financial Markets', 'relevance_sco...</td>
+<td>0.281319</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'GOOG', 'relevance_score': '0.0684...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">32</td>
+<td>How To Trade The Top Tech Stocks Today?</td>
+<td>https://www.benzinga.com/etfs/broad-u-s-equity...</td>
+<td>20250326T140440</td>
+<td>[RIPS]</td>
+<td>Good Morning Traders! In today's Market Clubho...</td>
+<td>https://www.benzinga.com/next-assets/images/sc...</td>
+<td>Benzinga</td>
+<td>Trading</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Economy - Monetary', 'relevance_sc...</td>
+<td>0.182323</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.1036...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">33</td>
+<td>Stock Market News For Mar 26, 2025</td>
+<td>https://www.zacks.com/stock/news/2435394/stock...</td>
+<td>20250326T132900</td>
+<td>[Zacks Equity Research]</td>
+<td>U.S. stocks ended higher on Tuesday on optimis...</td>
+<td>https://staticx-tuner.zacks.com/images/article...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Economy - Monetary', 'relevance_sc...</td>
+<td>0.078153</td>
+<td>Neutral</td>
+<td>[{'ticker': 'NVDA', 'relevance_score': '0.0884...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">34</td>
+<td>Alibaba, BMW Team Up To Bring AI-Powered Smart...</td>
+<td>https://www.benzinga.com/25/03/44492590/alibab...</td>
+<td>20250326T123553</td>
+<td>[Anusuya Lahiri]</td>
+<td>Alibaba and BMW to co-develop AI assistant usi...</td>
+<td>https://cdn.benzinga.com/files/images/story/20...</td>
+<td>Benzinga</td>
+<td>News</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Technology', 'relevance_score': '0...</td>
+<td>0.271142</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'BABA', 'relevance_score': '0.5341...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">35</td>
+<td>Should SPDR Portfolio S&amp;P 500 Value ETF ( SPY...</td>
+<td>https://www.zacks.com/stock/news/2435228/shoul...</td>
+<td>20250326T102006</td>
+<td>[Zacks Equity Research]</td>
+<td>Style Box ETF report for ...</td>
+<td>https://staticx-tuner.zacks.com/images/default...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Financial Markets', 'relevance_sco...</td>
+<td>0.258124</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.1261...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">36</td>
+<td>Is Vident U.S. Equity Strategy ETF ( VUSE ) ...</td>
+<td>https://www.zacks.com/stock/news/2435231/is-vi...</td>
+<td>20250326T102006</td>
+<td>[Zacks Equity Research]</td>
+<td>Smart Beta ETF report for ...</td>
+<td>https://staticx-tuner.zacks.com/images/default...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Technology', 'relevance_score': '0...</td>
+<td>0.229911</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'ORCL', 'relevance_score': '0.1130...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">37</td>
+<td>Should Goldman Sachs MarketBeta U.S. 1000 Equi...</td>
+<td>https://www.zacks.com/stock/news/2435232/shoul...</td>
+<td>20250326T102005</td>
+<td>[Zacks Equity Research]</td>
+<td>Style Box ETF report for GUSA ...</td>
+<td>https://staticx-tuner.zacks.com/images/default...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Financial Markets', 'relevance_sco...</td>
+<td>0.173142</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.1316...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">38</td>
+<td>Is WisdomTree U.S. LargeCap ETF ( EPS ) a St...</td>
+<td>https://www.zacks.com/stock/news/2435240/is-wi...</td>
+<td>20250326T102004</td>
+<td>[Zacks Equity Research]</td>
+<td>Smart Beta ETF report for ...</td>
+<td>https://staticx-tuner.zacks.com/images/default...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Earnings', 'relevance_score': '0.9...</td>
+<td>0.222288</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'GOOG', 'relevance_score': '0.0574...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">39</td>
+<td>Nasdaq Correction: 3 Unstoppable Growth Stocks...</td>
+<td>https://www.fool.com/investing/2025/03/26/nasd...</td>
+<td>20250326T084500</td>
+<td>[David Jagielski]</td>
+<td>The Nasdaq Composite is down 9.1% this year an...</td>
+<td>https://g.foolcdn.com/editorial/images/812126/...</td>
+<td>Motley Fool</td>
+<td>n/a</td>
+<td>www.fool.com</td>
+<td>[{'topic': 'Financial Markets', 'relevance_sco...</td>
+<td>0.118379</td>
+<td>Neutral</td>
+<td>[{'ticker': 'AMD', 'relevance_score': '0.34636...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">40</td>
+<td>3 Reasons to Buy Berkshire Hathaway Stock Like...</td>
+<td>https://www.fool.com/investing/2025/03/26/3-re...</td>
+<td>20250326T071100</td>
+<td>[Matt DiLallo]</td>
+<td>Berkshire Hathaway ( NYSE: BRK.B ) ( NYSE: BRK...</td>
+<td>https://g.foolcdn.com/editorial/images/812290/...</td>
+<td>Motley Fool</td>
+<td>n/a</td>
+<td>www.fool.com</td>
+<td>[{'topic': 'Financial Markets', 'relevance_sco...</td>
+<td>0.391278</td>
+<td>Bullish</td>
+<td>[{'ticker': 'BAC', 'relevance_score': '0.05707...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">41</td>
+<td>TSMC's $165 Billion Bet On US Chip Manufacturi...</td>
+<td>https://www.benzinga.com/markets/25/03/4448643...</td>
+<td>20250326T023821</td>
+<td>[Ananya Gairola]</td>
+<td>Taiwan Semiconductor Manufacturing Co.'s TSM $...</td>
+<td>https://cdn.benzinga.com/files/images/story/20...</td>
+<td>Benzinga</td>
+<td>Markets</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Technology', 'relevance_score': '0...</td>
+<td>0.052847</td>
+<td>Neutral</td>
+<td>[{'ticker': 'NVDA', 'relevance_score': '0.0940...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">42</td>
+<td>The "Magnificent Seven" Stocks Are Selling Off...</td>
+<td>https://www.fool.com/investing/2025/03/25/the-...</td>
+<td>20250326T013400</td>
+<td>[Keithen Drury]</td>
+<td>The "Magnificent Seven" stocks have been incre...</td>
+<td>https://media.ycharts.com/charts/07e8c58fe591e...</td>
+<td>Motley Fool</td>
+<td>n/a</td>
+<td>www.fool.com</td>
+<td>[{'topic': 'Retail &amp; Wholesale', 'relevance_sc...</td>
+<td>0.226443</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.1646...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">43</td>
+<td>Big Tech Companies Employ Majority Of H-1B Vis...</td>
+<td>https://www.benzinga.com/government/regulation...</td>
+<td>20250325T231956</td>
+<td>[Erica Kollmann]</td>
+<td>Amazon tops the list with 11,000 H-1B visa app...</td>
+<td>https://cdn.benzinga.com/files/images/story/20...</td>
+<td>Benzinga</td>
+<td>News</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Retail &amp; Wholesale', 'relevance_sc...</td>
+<td>0.145920</td>
+<td>Neutral</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.1702...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">44</td>
+<td>ARM Stock Declines 10% in a Month: Buy or Wait...</td>
+<td>https://www.zacks.com/stock/news/2435040/arm-s...</td>
+<td>20250325T172600</td>
+<td>[Shuvra Shankar Dey]</td>
+<td>Given the recent fall in Arm Holdings shares, ...</td>
+<td>https://staticx-tuner.zacks.com/images/article...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'IPO', 'relevance_score': '0.310843...</td>
+<td>0.369049</td>
+<td>Bullish</td>
+<td>[{'ticker': 'SSNLF', 'relevance_score': '0.061...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">45</td>
+<td>Spotify Stock Soars 130% in a Year: Is it Stil...</td>
+<td>https://www.zacks.com/stock/news/2435030/spoti...</td>
+<td>20250325T171100</td>
+<td>[Shuvra Shankar Dey]</td>
+<td>Given SPOT's price rise, we analyze its curren...</td>
+<td>https://staticx-tuner.zacks.com/images/article...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Retail &amp; Wholesale', 'relevance_sc...</td>
+<td>0.537158</td>
+<td>Bullish</td>
+<td>[{'ticker': 'SPOT', 'relevance_score': '0.4950...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">46</td>
+<td>Market Mechanics Driving Stocks, Tariffs Whips...</td>
+<td>https://www.benzinga.com/markets/equities/25/0...</td>
+<td>20250325T155000</td>
+<td>[The Arora Report]</td>
+<td>To gain an edge, this is what you need to know...</td>
+<td>https://thearorareport.com/wp-content/uploads/...</td>
+<td>Benzinga</td>
+<td>General</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Economy - Monetary', 'relevance_sc...</td>
+<td>0.202329</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'MSFT', 'relevance_score': '0.0881...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">47</td>
+<td>Live Nation Entertainment Rises 22% in a Year:...</td>
+<td>https://www.zacks.com/stock/news/2434927/live-...</td>
+<td>20250325T152300</td>
+<td>[Zacks Equity Research]</td>
+<td>LYV is well-positioned for growth in 2025 with...</td>
+<td>https://staticx-tuner.zacks.com/images/article...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Earnings', 'relevance_score': '0.6...</td>
+<td>0.392535</td>
+<td>Bullish</td>
+<td>[{'ticker': 'LYV', 'relevance_score': '0.44233...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">48</td>
+<td>4 Tech Stocks Penetrating the Health and Fitne...</td>
+<td>https://www.zacks.com/stock/news/2434924/4-tec...</td>
+<td>20250325T151700</td>
+<td>[Subham Roy]</td>
+<td>Let's take a look at four tech stocks, AAPL, G...</td>
+<td>https://staticx-tuner.zacks.com/images/article...</td>
+<td>Zacks Commentary</td>
+<td>n/a</td>
+<td>www.zacks.com</td>
+<td>[{'topic': 'Financial Markets', 'relevance_sco...</td>
+<td>0.285962</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'GOOG', 'relevance_score': '0.1408...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">49</td>
+<td>Inquiry Into Apple's Competitor Dynamics In Te...</td>
+<td>https://www.benzinga.com/insights/news/25/03/4...</td>
+<td>20250325T150049</td>
+<td>[Benzinga Insights]</td>
+<td>In today's rapidly changing and fiercely compe...</td>
+<td>https://www.benzinga.com/files/images/story/20...</td>
+<td>Benzinga</td>
+<td>Trading</td>
+<td>www.benzinga.com</td>
+<td>[{'topic': 'Earnings', 'relevance_score': '0.8...</td>
+<td>0.282258</td>
+<td>Somewhat-Bullish</td>
+<td>[{'ticker': 'AAPL', 'relevance_score': '0.4723...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="cell-12" class="cell" data-execution_count="101">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Flatten MultiIndex columns </span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>tsla.columns <span class="op">=</span> [</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'_'</span>.join(col).strip() <span class="cf">if</span> <span class="bu">isinstance</span>(col, <span class="bu">tuple</span>) <span class="cf">else</span> col</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> col <span class="kw">in</span> tsla.columns</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate True Range</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>tsla[<span class="st">"prev_close"</span>] <span class="op">=</span> tsla[<span class="st">"Close_TSLA"</span>].shift(<span class="dv">1</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>tsla[<span class="st">"tr1"</span>] <span class="op">=</span> tsla[<span class="st">"High_TSLA"</span>] <span class="op">-</span> tsla[<span class="st">"Low_TSLA"</span>]</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>tsla[<span class="st">"tr2"</span>] <span class="op">=</span> <span class="bu">abs</span>(tsla[<span class="st">"High_TSLA"</span>] <span class="op">-</span> tsla[<span class="st">"prev_close"</span>])</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>tsla[<span class="st">"tr3"</span>] <span class="op">=</span> <span class="bu">abs</span>(tsla[<span class="st">"Low_TSLA"</span>] <span class="op">-</span> tsla[<span class="st">"prev_close"</span>])</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>tsla[<span class="st">"true_range"</span>] <span class="op">=</span> tsla[[<span class="st">"tr1"</span>, <span class="st">"tr2"</span>, <span class="st">"tr3"</span>]].<span class="bu">max</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co"># 10-day ATR</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>tsla[<span class="st">"ATR_10"</span>] <span class="op">=</span> tsla[<span class="st">"true_range"</span>].rolling(window<span class="op">=</span><span class="dv">10</span>).mean()</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- STEP 4: Calculate ATR as a percentage of closing price ----</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>tsla[<span class="st">"atr_pct"</span>] <span class="op">=</span> tsla[<span class="st">"ATR_10"</span>] <span class="op">/</span> tsla[<span class="st">"Close_TSLA"</span>]</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="co"># allocating the capital</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> position_size(row):</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> row[<span class="st">"atr_pct"</span>] <span class="op">&lt;</span> <span class="fl">0.03</span>:  <span class="co"># &lt; 3% volatility → low risk</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="fl">0.01</span>  <span class="co"># allocate 1% of capital</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:  <span class="co"># ≥ 3% volatility → high risk</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="fl">0.005</span>  <span class="co"># allocate 0.5% of capital</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>tsla[<span class="st">"position_size"</span>] <span class="op">=</span> tsla.<span class="bu">apply</span>(position_size, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- STEP 6: Optional - Capital allocation per trade ----</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a><span class="co">#capital = 100000 # Example: $100K total portfolio</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a><span class="co">#tsla["allocation_dollars"] = tsla["position_size"] * capital</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Preview ----</span></span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tsla[[<span class="st">"Close_TSLA"</span>, <span class="st">"ATR_10"</span>, <span class="st">"atr_pct"</span>, <span class="st">"position_size"</span>]].tail(<span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Close_TSLA     ATR_10   atr_pct  position_size
+Date                                                      
+2025-02-19  360.559998  16.703000  0.046325          0.005
+2025-02-20  354.399994  16.464999  0.046459          0.005
+2025-02-21  337.799988  17.021997  0.050391          0.005
+2025-02-24  330.529999  16.770996  0.050740          0.005
+2025-02-25  302.799988  18.879996  0.062351          0.005
+2025-02-26  290.799988  18.412994  0.063318          0.005
+2025-02-27  281.950012  18.257996  0.064756          0.005
+2025-02-28  292.980011  18.067996  0.061670          0.005
+2025-03-03  284.649994  19.281998  0.067739          0.005
+2025-03-04  272.040009  20.654996  0.075926          0.005</code></pre>
+</div>
+</div>
+<div id="cell-13" class="cell" data-execution_count="102">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.express <span class="im">as</span> px</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> px.line(tsla, x<span class="op">=</span>tsla.index, y<span class="op">=</span><span class="st">"atr_pct"</span>, title<span class="op">=</span><span class="st">"ATR% Over Time"</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>fig.add_hline(y<span class="op">=</span><span class="fl">0.03</span>, line_dash<span class="op">=</span><span class="st">"dot"</span>, line_color<span class="op">=</span><span class="st">"green"</span>, annotation_text<span class="op">=</span><span class="st">"Low Volatility Cutoff"</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>fig.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/opt/anaconda3/lib/python3.11/site-packages/_plotly_utils/basevalidators.py:106: FutureWarning:
+
+The behavior of DatetimeProperties.to_pydatetime is deprecated, in a future version this will return a Series containing python datetime objects instead of an ndarray. To retain the old behavior, call `np.array` on the result
+</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>Unable to display output for mime type(s): application/vnd.plotly.v1+json</code></pre>
+</div>
+</div>
+<div id="cell-14" class="cell" data-execution_count="103">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.express <span class="im">as</span> px</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter only 2025 data</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>tsla_2025 <span class="op">=</span> tsla[tsla.index.year <span class="op">==</span> <span class="dv">2025</span>]</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> px.line(tsla_2025, x<span class="op">=</span>tsla_2025.index, y<span class="op">=</span><span class="st">"atr_pct"</span>, title<span class="op">=</span><span class="st">"ATR% Over Time (2025 Only)"</span>)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>fig.add_hline(y<span class="op">=</span><span class="fl">0.03</span>, line_dash<span class="op">=</span><span class="st">"dot"</span>, line_color<span class="op">=</span><span class="st">"green"</span>, annotation_text<span class="op">=</span><span class="st">"Low Volatility Cutoff"</span>)</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>fig.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/opt/anaconda3/lib/python3.11/site-packages/_plotly_utils/basevalidators.py:106: FutureWarning:
+
+The behavior of DatetimeProperties.to_pydatetime is deprecated, in a future version this will return a Series containing python datetime objects instead of an ndarray. To retain the old behavior, call `np.array` on the result
+</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>Unable to display output for mime type(s): application/vnd.plotly.v1+json</code></pre>
+</div>
+</div>
+<div id="cell-15" class="cell" data-execution_count="111">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.graph_objects <span class="im">as</span> go</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> go.Figure()</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>fig.add_trace(go.Scatter(</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>tsla.index,</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>tsla[<span class="st">"VI+_"</span>],</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    mode<span class="op">=</span><span class="st">'lines'</span>,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">'VI+_'</span>,</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    line<span class="op">=</span><span class="bu">dict</span>(color<span class="op">=</span><span class="st">'blue'</span>)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>fig.add_trace(go.Scatter(</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>tsla.index,</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>tsla[<span class="st">"VI-_"</span>],</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    mode<span class="op">=</span><span class="st">'lines'</span>,</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">'VI-_'</span>,</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>    line<span class="op">=</span><span class="bu">dict</span>(color<span class="op">=</span><span class="st">'orange'</span>)</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>fig.update_layout(</span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Vortex Indicator (VI+ and VI−) for TSLA"</span>,</span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>    xaxis_title<span class="op">=</span><span class="st">"Date"</span>,</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>    yaxis_title<span class="op">=</span><span class="st">"Value"</span>,</span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>    legend<span class="op">=</span><span class="bu">dict</span>(x<span class="op">=</span><span class="dv">0</span>, y<span class="op">=</span><span class="fl">1.1</span>, orientation<span class="op">=</span><span class="st">"h"</span>),</span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>    template<span class="op">=</span><span class="st">"plotly_white"</span></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>fig.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>Unable to display output for mime type(s): application/vnd.plotly.v1+json</code></pre>
+</div>
+</div>
+<div id="cell-16" class="cell" data-execution_count="112">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> go.Figure()</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>fig.add_trace(go.Scatter(</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>spy.index,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>spy[<span class="st">"VI+"</span>],</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    mode<span class="op">=</span><span class="st">'lines'</span>,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">'VI+'</span>,</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    line<span class="op">=</span><span class="bu">dict</span>(color<span class="op">=</span><span class="st">'blue'</span>)</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>fig.add_trace(go.Scatter(</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>spy.index,</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>spy[<span class="st">"VI-"</span>],</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>    mode<span class="op">=</span><span class="st">'lines'</span>,</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">'VI-'</span>,</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>    line<span class="op">=</span><span class="bu">dict</span>(color<span class="op">=</span><span class="st">'orange'</span>)</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>fig.update_layout(</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Vortex Indicator (VI+ and VI−) for SPY"</span>,</span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>    xaxis_title<span class="op">=</span><span class="st">"Date"</span>,</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>    yaxis_title<span class="op">=</span><span class="st">"Value"</span>,</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>    legend<span class="op">=</span><span class="bu">dict</span>(x<span class="op">=</span><span class="dv">0</span>, y<span class="op">=</span><span class="fl">1.1</span>, orientation<span class="op">=</span><span class="st">"h"</span>),</span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>    template<span class="op">=</span><span class="st">"plotly_white"</span></span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>fig.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>Unable to display output for mime type(s): application/vnd.plotly.v1+json</code></pre>
+</div>
+</div>
+<div id="cell-17" class="cell" data-execution_count="113">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> go.Figure()</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>fig.add_trace(go.Scatter(</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>xly.index,</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>xly[<span class="st">"VI+"</span>],</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    mode<span class="op">=</span><span class="st">'lines'</span>,</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">'VI+'</span>,</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    line<span class="op">=</span><span class="bu">dict</span>(color<span class="op">=</span><span class="st">'blue'</span>)</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>fig.add_trace(go.Scatter(</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>xly.index,</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>xly[<span class="st">"VI-"</span>],</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>    mode<span class="op">=</span><span class="st">'lines'</span>,</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">'VI-'</span>,</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>    line<span class="op">=</span><span class="bu">dict</span>(color<span class="op">=</span><span class="st">'orange'</span>)</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>fig.update_layout(</span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Vortex Indicator (VI+ and VI−) for XLY"</span>,</span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>    xaxis_title<span class="op">=</span><span class="st">"Date"</span>,</span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>    yaxis_title<span class="op">=</span><span class="st">"Value"</span>,</span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>    legend<span class="op">=</span><span class="bu">dict</span>(x<span class="op">=</span><span class="dv">0</span>, y<span class="op">=</span><span class="fl">1.1</span>, orientation<span class="op">=</span><span class="st">"h"</span>),</span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>    template<span class="op">=</span><span class="st">"plotly_white"</span></span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a>fig.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>Unable to display output for mime type(s): application/vnd.plotly.v1+json</code></pre>
+</div>
+</div>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
